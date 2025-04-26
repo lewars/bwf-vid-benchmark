@@ -45,6 +45,8 @@ tasks:
   test:
     desc: Run unit tests using pytest
     deps: [setup]
+    env:
+      PYTHONPATH: "{{.PWD}}/src:{{.Env.PYTHONPATH}}" # Prepend src dir to path
     cmds:
       - |
         {{.PYTHON_EXEC}} -m pytest \

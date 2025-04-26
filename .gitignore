@@ -15,6 +15,7 @@ venv/
 
 # Unit test / coverage reports (Common)
 .coverage
+.pytest_reportlog.jsonl
 .pytest_cache/
 htmlcov/
 
