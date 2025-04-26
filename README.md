@@ -55,7 +55,7 @@ The framework prioritizes reproducibility, automation via Taskfile, and resource
 
 ## **Development Tasks**
 
-* Run Unit Tests:
+* **Run Unit Tests:**
 
   Execute the test suite using pytest, including coverage reporting.
 
@@ -63,7 +63,7 @@ The framework prioritizes reproducibility, automation via Taskfile, and resource
     task test
     ```
 
-* Run Linters:
+* **Run Linters:**
 
   Check Python code style (flake8) and YAML syntax (yamllint).
 
@@ -73,7 +73,7 @@ The framework prioritizes reproducibility, automation via Taskfile, and resource
   task lint-yaml    # Run only YAML linter
   ```
 
-* Clean Up:
+* **Clean Up:**
 
   Remove the virtual environment (`.venv`) and temporary cache files. Does not remove results.
 
