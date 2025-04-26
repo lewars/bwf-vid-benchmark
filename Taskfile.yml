@@ -1,0 +1,80 @@
+version: '3'
+
+vars:
+  VENV_DIR: .venv
+  PYTHON_EXEC: '{{.VENV_DIR}}/bin/python3'
+  SRC_DIR: src
+  UNIT_TEST_DIR: tests
+  TEST_CASES: test_cases/test_cases.yaml
+
+tasks:
+  default:
+    desc: Run the video generation benchmark (default task)
+    deps: [run]
+    cmds:
+      - |
+        echo "Default task: Benchmark run initiated via 'run' task dependency."
+
+  setup:
+    desc: Create virtual environment and install dependencies
+    cmds:
+      - python3 -m venv --clear {{.VENV_DIR}}
+      - '{{.PYTHON_EXEC}} -m pip install --upgrade pip'
+      - '{{.PYTHON_EXEC}} -m pip install -r requirements.txt'
+    # Check if venv activation script exists as a proxy for setup completion
+    status:
+      - test -f {{.VENV_DIR}}/bin/activate
+
+  lint-py:
+    desc: Lint Python source code and tests using flake8
+    deps: [setup]
+    cmds:
+      - '{{.PYTHON_EXEC}} -m flake8 {{.SRC_DIR}} {{.UNIT_TEST_DIR}}'
+
+  lint-yaml:
+    desc: Lint YAML configuration files using yamllint
+    cmds:
+      - yamllint {{.TEST_CASES}}
+
+  lint:
+    desc: Run all code and configuration linters
+    deps: [lint-py, lint-yaml]
+    cmds:
+      - echo "All linters passed."
+
+  test:
+    desc: Run unit tests using pytest
+    deps: [setup]
+    cmds:
+      - |
+        {{.PYTHON_EXEC}} -m pytest \
+          -v \
+          -s \
+          --cov={{.SRC_DIR}} \
+          -ra \
+          --report-log=.pytest_reportlog.jsonl \
+          {{.UNIT_TEST_DIR}}
+
+  run:
+    desc: Run the video generation benchmark
+    aliases: [benchmark] # Alias 'benchmark' for this task
+    deps: [setup]
+    cmds:
+      - '{{.PYTHON_EXEC}} {{.SRC_DIR}}/bwf_vid_bench.py'
+
+  analyze:
+    desc: Analyze benchmark results and generate plots
+    deps: [setup]
+    cmds:
+      - '{{.PYTHON_EXEC}} {{.SRC_DIR}}/analyze_results.py'
+
+  clean:
+    desc: Remove virtual environment, cache files, and build artifacts
+    cmds:
+      - |
+        echo "Cleaning project..."
+        rm -rf {{.VENV_DIR}}
+        find . -type f -name '*.py[co]' -delete -o -type d \
+        -name __pycache__ -delete
+        rm -rf .pytest_cache
+        echo "Clean complete."
