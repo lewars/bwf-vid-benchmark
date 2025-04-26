@@ -16,23 +16,21 @@ The framework prioritizes reproducibility, automation via Taskfile, and resource
 
 ## **Setup**
 
-1. **Clone the repository:**
+**Clone the repository and Setup Environment:**
    ```bash
    git clone https://github.com/lewars/bwf-vid-benchmark.git
    cd bwf-vid-bench
-   ```
-
-2. Create environment and install dependencies:
-   This command creates a Python virtual environment (.venv), installs required packages from requirements.txt, and ensures the environment is ready.
+   pip install task
    task setup
-
-   *(Note: The first run might take some time to download and install packages).*
+   ```
 
 ## **Usage**
 
-1. Define Test Cases:
+1. **Define Test Cases:**
+
    Edit the `test_cases/test_cases.yaml` file to define the specific benchmark scenarios you want to run (model, prompt, resolution, seed, etc.).
-2. Run the Benchmark:
+2. **Run the Benchmark:**
+
    Execute the main benchmark script. This will iterate through the test cases defined in `test_cases.yaml`, generate videos, and record metrics in timestamped directories within `results/`.
 
    ```bash
@@ -47,7 +45,8 @@ The framework prioritizes reproducibility, automation via Taskfile, and resource
 
    *(This is also the default task, so running `task` alone will execute the benchmark).*
 
-3. Analyze Results:
+3. **Analyze Results:**
+
    Run the analysis script to process the latest results (or specify a directory) and generate plots/summaries.
 
     ```bash
@@ -57,6 +56,7 @@ The framework prioritizes reproducibility, automation via Taskfile, and resource
 ## **Development Tasks**
 
 * Run Unit Tests:
+
   Execute the test suite using pytest, including coverage reporting.
 
     ```bash
@@ -64,6 +64,7 @@ The framework prioritizes reproducibility, automation via Taskfile, and resource
     ```
 
 * Run Linters:
+
   Check Python code style (flake8) and YAML syntax (yamllint).
 
   ```bash
@@ -73,6 +74,7 @@ The framework prioritizes reproducibility, automation via Taskfile, and resource
   ```
 
 * Clean Up:
+
   Remove the virtual environment (`.venv`) and temporary cache files. Does not remove results.
 
     ```bash
