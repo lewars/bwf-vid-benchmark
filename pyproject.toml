@@ -1,0 +1,107 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bwf-vid-bench"
+version = "0.1.0"
+description = "Bitwise Film's AI Video Generation Benchmark Framework"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "GPL-3.0-only" }
+authors = [
+  { name="Alistair Y. Lewars", email="alistair.lewars@gmail.com" },
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: POSIX :: Linux",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: System :: Benchmark",
+]
+
+dependencies = [
+    "PyYAML>=6.0",
+    "psutil>=7.0",
+    "pandas>=2.0",
+    "matplotlib>=3.8", # Adjusted based on typical compatibility
+    "seaborn>=0.13",
+    "numpy>=1.26", # Adjusted based on typical compatibility
+    "torch>=2.3", # Adjusted based on typical compatibility
+    "diffusers>=0.27", # Adjusted based on typical compatibility
+    "transformers>=4.38", # Adjusted based on typical compatibility
+    "accelerate>=0.27", # Adjusted based on typical compatibility
+    "opencv-python>=4.8", # Adjusted based on typical compatibility
+    "nvidia-ml-py>=12.0", # Or pynvml if preferred
+    "Pillow>=10.0",
+    "tqdm>=4.66",
+    "scikit-image>=0.22", # For potential SSIM calculation
+    "scipy>=1.11", # Dependency for scikit-image
+    "huggingface-hub>=0.20", # Dependency for diffusers/transformers
+    "safetensors>=0.4", # Dependency for diffusers/transformers
+    "filelock>=3.12", # Dependency for diffusers/transformers
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+]
+lint = [
+    "flake8>=7.0",
+    "yamllint>=1.35",
+]
+dev = [
+    "bwf-vid-bench[test,lint]", # Installs dependencies from 'test' and 'lint' sections
+    "task>=0.2.0", # Include the task runner for convenience
+    "black",
+    "isort",
+    "mypy",
+]
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+addopts = "-ra -v -s --cov=src --cov-report=term-missing"
+testpaths = [
+    "tests",
+]
+pythonpath = [
+    "src",
+]
+filterwarnings = [
+    "ignore:cannot collect test class 'TestCase'.*__init__ constructor:pytest.PytestCollectionWarning",
+    "ignore:cannot collect test class 'TestCaseLoadError'.*__init__ constructor:pytest.PytestCollectionWarning",
+    "ignore:cannot collect test class 'TestMetrics'.*__init__ constructor:pytest.PytestCollectionWarning",
+    "ignore:cannot collect test class 'TestMetrics'.*__init__ constructor:pytest.PytestCollectionWarning",
+    "ignore:cannot collect test class 'TestCaseLoadError'.*__init__ constructor:pytest.PytestCollectionWarning",
+    "ignore:cannot collect test class 'TestMetrics'.*__init__ constructor:pytest.PytestCollectionWarning",
+]
+
+[tool.flake8]
+max-line-length = 88
+exclude = [
+    ".venv",
+    ".git",
+    "__pycache__",
+    "build",
+    "dist",
+    "*.egg-info",
+]
+
+[tool.coverage.run]
+source = ["src"]
+branch = true
+
+[tool.coverage.report]
+fail_under = 75
+show_missing = true
+skip_covered = true
+
+[tool.black]
+line-length = 88
+
+[tool.isort]
+profile = "black"
+line_length = 88
