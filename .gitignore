@@ -19,20 +19,13 @@ venv/
 .pytest_cache/
 htmlcov/
 
-# --- Project Specific ---
-# Results directory (Uncomment if you DON'T want to track results in Git)
-# results/
+results/
 
-# --- Operating System Files ---
-# Linux/macOS system files
 .DS_Store
 ._*
 
-# --- Editor Files ---
-# Emacs (User preference)
 *~
 #*#
 .\#*
 
-# VS Code (Common)
 .vscode/

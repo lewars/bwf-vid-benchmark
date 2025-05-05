@@ -30,7 +30,6 @@ tasks:
     cmds:
       - 'uv pip compile --extra dev --resolver=backtracking pyproject.toml -o {{.REQ_FILE}}'
     status:
-      # Check if requirements.txt exists
       - test -f {{.REQ_FILE}}
 
   setup:
@@ -46,22 +45,19 @@ tasks:
     desc: Upgrade dependencies and regenerate lock file using uv
     deps: [venv]
     cmds:
-      # Use uv pip compile directly with --upgrade flag
       - 'uv pip compile --upgrade --extra dev --resolver=backtracking pyproject.toml -o {{.REQ_FILE}}'
       - echo "Lock file {{.REQ_FILE}} updated. Run 'task setup' to install."
 
   lint-py:
     desc: Lint Python source code and tests using flake8
-    deps: [setup] # Ensure flake8 is installed via setup
+    deps: [setup]
     cmds:
-      # Execute flake8 using the python from the venv
       - '{{.PYTHON_EXEC}} -m flake8 {{.SRC_DIR}} {{.UNIT_TEST_DIR}}'
 
   lint-yaml:
     desc: Lint YAML configuration files using yamllint
-    deps: [setup] # Ensure yamllint is installed via setup
+    deps: [setup]
     cmds:
-      # Execute yamllint using the python from the venv
       - '{{.PYTHON_EXEC}} -m yamllint {{.TEST_CASES_YAML}}'
 
   lint:
@@ -72,33 +68,29 @@ tasks:
 
   black:
     desc: Format Python source code and tests using black
-    deps: [setup] # Ensure black is installed via setup
+    deps: [setup]
     cmds:
       - '{{.PYTHON_EXEC}} -m black {{.SRC_DIR}} {{.UNIT_TEST_DIR}}'
 
   test:
     desc: Run unit tests using pytest
-    deps: [setup] # Ensure pytest and project are installed
+    deps: [setup]
     cmds:
-      # Execute pytest using the python from the venv
-      # Pytest should pick up config from pyproject.toml
       - '{{.PYTHON_EXEC}} -m pytest'
 
   run:
     desc: Run the video generation benchmark
     aliases: [benchmark]
-    deps: [setup] # Ensure environment is fully set up
+    deps: [setup]
     cmds:
-      # Execute the main script using the python from the venv
       - '{{.PYTHON_EXEC}} {{.SRC_DIR}}/bench.py'
 
   analyze:
     desc: Analyze benchmark results and generate plots
     deps: [setup]
     cmds:
-      # Execute the analysis script using the python from the venv
-      - '{{.PYTHON_EXEC}} {{.SRC_DIR}}/analyze_results.py --csv-file path/to/your/summary.csv --output-dir path/to/plots'
-      # Note: Adjust input/output paths as needed
+      - '{{.PYTHON_EXEC}} {{.SRC_DIR}}/analyze_results.py --csv-file results/summary.csv --output-dir results/plots'
+
 
   clean:
     desc: Remove virtual environment, cache files, build artifacts, and lock file
