@@ -1,11 +1,13 @@
+# Taskfile.yml (using uv)
 version: '3'
 
 vars:
   VENV_DIR: .venv
   PYTHON_EXEC: '{{.VENV_DIR}}/bin/python3'
+  REQ_FILE: requirements.txt
   SRC_DIR: src
   UNIT_TEST_DIR: tests
-  TEST_CASES: test_cases/test_cases.yaml
+  TEST_CASES_YAML: test_cases/test_cases.yml
 
 tasks:
   default:
@@ -13,28 +15,54 @@ tasks:
     deps: [run]
     cmds:
       - |
-        echo "Default task: Benchmark run initiated via 'run' task dependency."
+        echo "Run benchmark"
+
+  venv:
+    desc: Create virtual environment using uv
+    cmds:
+      - 'uv venv {{.VENV_DIR}}'
+    status:
+      - test -d {{.VENV_DIR}}
+
+  lock:
+    desc: Generate requirements.txt lock file from pyproject.toml using uv
+    deps: [venv]
+    cmds:
+      - 'uv pip compile --extra dev --resolver=backtracking pyproject.toml -o {{.REQ_FILE}}'
+    status:
+      # Check if requirements.txt exists
+      - test -f {{.REQ_FILE}}
 
   setup:
-    desc: Create virtual environment and install dependencies
+    desc: Install dependencies from lock file using uv sync and install project editable
+    deps: [venv, lock]
     cmds:
-      - python3 -m venv --clear {{.VENV_DIR}}
-      - '{{.PYTHON_EXEC}} -m pip install --upgrade pip'
-      - '{{.PYTHON_EXEC}} -m pip install -r requirements.txt'
-    # Check if venv activation script exists as a proxy for setup completion
+      - 'uv pip sync {{.REQ_FILE}}'
+      - 'uv pip install -e ".[dev]"'
     status:
-      - test -f {{.VENV_DIR}}/bin/activate
+      - '{{.PYTHON_EXEC}} -c "import pytest; import bwf_vid_bench"'
+
+  update:
+    desc: Upgrade dependencies and regenerate lock file using uv
+    deps: [venv]
+    cmds:
+      # Use uv pip compile directly with --upgrade flag
+      - 'uv pip compile --upgrade --extra dev --resolver=backtracking pyproject.toml -o {{.REQ_FILE}}'
+      - echo "Lock file {{.REQ_FILE}} updated. Run 'task setup' to install."
 
   lint-py:
     desc: Lint Python source code and tests using flake8
-    deps: [setup]
+    deps: [setup] # Ensure flake8 is installed via setup
     cmds:
+      # Execute flake8 using the python from the venv
       - '{{.PYTHON_EXEC}} -m flake8 {{.SRC_DIR}} {{.UNIT_TEST_DIR}}'
 
   lint-yaml:
     desc: Lint YAML configuration files using yamllint
+    deps: [setup] # Ensure yamllint is installed via setup
     cmds:
-      - yamllint {{.TEST_CASES}}
+      # Execute yamllint using the python from the venv
+      - '{{.PYTHON_EXEC}} -m yamllint {{.TEST_CASES_YAML}}'
 
   lint:
     desc: Run all code and configuration linters
@@ -42,41 +70,48 @@ tasks:
     cmds:
       - echo "All linters passed."
 
+  black:
+    desc: Format Python source code and tests using black
+    deps: [setup] # Ensure black is installed via setup
+    cmds:
+      - '{{.PYTHON_EXEC}} -m black {{.SRC_DIR}} {{.UNIT_TEST_DIR}}'
+
   test:
     desc: Run unit tests using pytest
-    deps: [setup]
-    env:
-      PYTHONPATH: "{{.PWD}}/src:{{.Env.PYTHONPATH}}" # Prepend src dir to path
+    deps: [setup] # Ensure pytest and project are installed
     cmds:
-      - |
-        {{.PYTHON_EXEC}} -m pytest \
-          -v \
-          -s \
-          --cov={{.SRC_DIR}} \
-          -ra \
-          --report-log=.pytest_reportlog.jsonl \
-          {{.UNIT_TEST_DIR}}
+      # Execute pytest using the python from the venv
+      # Pytest should pick up config from pyproject.toml
+      - '{{.PYTHON_EXEC}} -m pytest'
 
   run:
     desc: Run the video generation benchmark
-    aliases: [benchmark] # Alias 'benchmark' for this task
-    deps: [setup]
+    aliases: [benchmark]
+    deps: [setup] # Ensure environment is fully set up
     cmds:
-      - '{{.PYTHON_EXEC}} {{.SRC_DIR}}/bwf_vid_bench.py'
+      # Execute the main script using the python from the venv
+      - '{{.PYTHON_EXEC}} {{.SRC_DIR}}/bench.py'
 
   analyze:
     desc: Analyze benchmark results and generate plots
     deps: [setup]
     cmds:
-      - '{{.PYTHON_EXEC}} {{.SRC_DIR}}/analyze_results.py'
+      # Execute the analysis script using the python from the venv
+      - '{{.PYTHON_EXEC}} {{.SRC_DIR}}/analyze_results.py --csv-file path/to/your/summary.csv --output-dir path/to/plots'
+      # Note: Adjust input/output paths as needed
 
   clean:
-    desc: Remove virtual environment, cache files, and build artifacts
+    desc: Remove virtual environment, cache files, build artifacts, and lock file
     cmds:
       - |
         echo "Cleaning project..."
         rm -rf {{.VENV_DIR}}
+        # Keep standard cache cleaning
         find . -type f -name '*.py[co]' -delete -o -type d \
         -name __pycache__ -delete
-        rm -rf .pytest_cache
+        rm -rf .pytest_cache .coverage .mypy_cache build dist *.egg-info
+        # Remove uv cache if desired (optional, can grow large but speeds up subsequent installs)
+        # rm -rf ~/.cache/uv
+        rm -f {{.REQ_FILE}} # Remove the lock file
+        rm -f .pytest_reportlog.jsonl # Remove report log
         echo "Clean complete."

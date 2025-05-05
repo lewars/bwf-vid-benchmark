@@ -18,7 +18,6 @@ from metrics import PeakResourceUsage, TestMetrics
 from monitor import ResourceMonitor
 from orchestrator import BenchmarkOrchestrator
 
-# --- Shared Test Data Fixtures ---
 
 @pytest.fixture(scope="session")
 def valid_test_case_data() -> dict[str, Any]:
@@ -52,12 +51,13 @@ def valid_test_case_data_minimal() -> dict[str, Any]:
 @pytest.fixture
 def valid_peak_resources() -> PeakResourceUsage:
     """Returns a valid PeakResourceUsage instance."""
-    # Use the placeholder class for now
     return PeakResourceUsage(peak_vram_mb=1024.5, peak_ram_mb=2048.0)
 
 
 @pytest.fixture
-def completed_test_metrics(valid_peak_resources: PeakResourceUsage) -> TestMetrics:
+def completed_test_metrics(
+    valid_peak_resources: PeakResourceUsage,
+) -> TestMetrics:
     """Returns a valid TestMetrics instance for a completed test."""
     return TestMetrics(
         test_case_id="test_completed_01",
@@ -93,7 +93,9 @@ def minimal_completed_test_metrics() -> TestMetrics:
 
 
 @pytest.fixture
-def yaml_file_creator(tmp_path: Path) -> Callable[[str, Dict[str, Any]], Path]:
+def yaml_file_creator(
+    tmp_path: Path,
+) -> Callable[[str, Dict[str, Any]], Path]:
     """
     Provides a fixture that yields a function to create YAML files
     in the temporary test directory (`tmp_path`). Automatically cleans up
@@ -128,12 +130,16 @@ def yaml_file_creator(tmp_path: Path) -> Callable[[str, Dict[str, Any]], Path]:
     # This code runs after the test function finishes
     for file_path in created_files:
         try:
-            if file_path.exists():  # Check if file still exists before trying to delete
+            if (
+                file_path.exists()
+            ):  # Check if file still exists before trying to delete
                 os.remove(file_path)
                 # print(f"Cleaned up: {file_path}") # Optional: for debugging
         except OSError as e:
             # Log error if cleanup fails, but don't fail the test itself
-            print(f"Warning: Failed to clean up temporary file {file_path}: {e}")
+            print(
+                f"Warning: Failed to clean up temporary file {file_path}: {e}"
+            )
 
 
 @pytest.fixture
@@ -183,7 +189,9 @@ def csv_file_creator(
             if file_path.exists():
                 os.remove(file_path)
         except OSError as e:
-            print(f"Warning: Failed to clean up temporary file {file_path}: {e}")
+            print(
+                f"Warning: Failed to clean up temporary file {file_path}: {e}"
+            )
 
 
 # --- Sample Data for Analyzer Tests ---
@@ -219,22 +227,24 @@ def sample_summary_data() -> List[Dict[str, Any]]:
         },
     ]
 
+
 @pytest.fixture
 def mock_csv_path(tmp_path: Path) -> Path:
     """Provides a path for a mock CSV file within the temp directory."""
     return tmp_path / "summary_test.csv"
 
+
 # Mock pynvml if it wasn't available during import in monitor.py
 # This allows testing the logic even if the real pynvml isn't installed
-if 'monitor.pynvml' not in sys.modules:
-     # If pynvml failed to import in monitor.py, create a mock for it
-     # This is tricky because the import happens at module level.
-     # A common approach is to structure the code to allow injection or
-     # ensure pynvml is mocked *before* monitor.py is imported by pytest.
-     # For simplicity here, we'll rely on patching within tests.
-     # If tests fail due to PYNXML_AVAILABLE being False when it shouldn't be,
-     # consider using pytest-mock's `module_mocker`.
-     pass
+if "monitor.pynvml" not in sys.modules:
+    # If pynvml failed to import in monitor.py, create a mock for it
+    # This is tricky because the import happens at module level.
+    # A common approach is to structure the code to allow injection or
+    # ensure pynvml is mocked *before* monitor.py is imported by pytest.
+    # For simplicity here, we'll rely on patching within tests.
+    # If tests fail due to PYNXML_AVAILABLE being False when it shouldn't be,
+    # consider using pytest-mock's `module_mocker`.
+    pass
 
 
 @pytest.fixture
@@ -242,13 +252,13 @@ def mock_pynvml():
     """Fixture to mock the pynvml library."""
     # Create mocks for pynvml structures if needed
     mock_mem_info = MagicMock()
-    mock_mem_info.used = 0 # Default value
+    mock_mem_info.used = 0  # Default value
 
     mock_handle = MagicMock(name="NVMLHandle")
 
     # Mock the pynvml module itself
     pynvml_mock = MagicMock(name="pynvml_module")
-    pynvml_mock.NVMLError = Exception # Mock the exception type
+    pynvml_mock.NVMLError = Exception  # Mock the exception type
     pynvml_mock.nvmlInit.return_value = None
     pynvml_mock.nvmlShutdown.return_value = None
     pynvml_mock.nvmlDeviceGetHandleByIndex.return_value = mock_handle
@@ -256,66 +266,89 @@ def mock_pynvml():
 
     return pynvml_mock, mock_handle, mock_mem_info
 
+
 @pytest.fixture
 def mock_psutil():
     """Fixture to mock the psutil library."""
     mock_process = MagicMock(name="psutil_Process")
     mock_mem_info = MagicMock()
-    mock_mem_info.rss = 0 # Default value
+    mock_mem_info.rss = 0  # Default value
     mock_process.memory_info.return_value = mock_mem_info
 
     psutil_mock = MagicMock(name="psutil_module")
     psutil_mock.Process.return_value = mock_process
-    psutil_mock.NoSuchProcess = ProcessLookupError # Mock exception type
+    psutil_mock.NoSuchProcess = ProcessLookupError  # Mock exception type
 
     return psutil_mock, mock_process, mock_mem_info
+
 
 # --- Mock Adapter Classes ---
 # Create mock classes that conform to the ModelAdapter protocol for testing
 
+
 class MockAdapterA:
     """Mock adapter class A conforming to ModelAdapter protocol."""
+
     def __init__(self):
         # Use MagicMock for methods to track calls
         self.load_model = MagicMock(name="load_model_A")
         self.unload_model = MagicMock(name="unload_model_A")
         self.generate = MagicMock(name="generate_A")
         # Mock generate to return a GeneratedVideo object
-        self.generate.return_value = GeneratedVideo(file_path=Path("mock_a_video.mp4"))
+        self.generate.return_value = GeneratedVideo(
+            file_path=Path("mock_a_video.mp4")
+        )
 
-    def load_model(self) -> None: pass
-    def unload_model(self) -> None: pass
-    def generate(self, test_case: TestCase, output_dir: Path) -> GeneratedVideo: pass
+    def load_model(self) -> None:
+        pass
+
+    def unload_model(self) -> None:
+        pass
+
+    def generate(self, test_case: TestCase, output_dir: Path) -> GeneratedVideo:
+        pass
+
 
 class MockAdapterB:
     """Mock adapter class B conforming to ModelAdapter protocol."""
+
     def __init__(self):
         self.load_model = MagicMock(name="load_model_B")
         self.unload_model = MagicMock(name="unload_model_B")
         self.generate = MagicMock(name="generate_B")
-        self.generate.return_value = GeneratedVideo(file_path=Path("mock_b_video.mp4"))
+        self.generate.return_value = GeneratedVideo(
+            file_path=Path("mock_b_video.mp4")
+        )
 
-    def load_model(self) -> None: pass
-    def unload_model(self) -> None: pass
-    def generate(self, test_case: TestCase, output_dir: Path) -> GeneratedVideo: pass
+    def load_model(self) -> None:
+        pass
+
+    def unload_model(self) -> None:
+        pass
+
+    def generate(self, test_case: TestCase, output_dir: Path) -> GeneratedVideo:
+        pass
 
 
 # --- Fixtures ---
+
 
 @pytest.fixture
 def video_generator() -> VideoGenerator:
     """Fixture to create a VideoGenerator instance for each test."""
     return VideoGenerator()
 
+
 @pytest.fixture
 def test_case_a(valid_test_case_data) -> TestCase:
     """Fixture for a TestCase configured for MockAdapterA."""
     data = valid_test_case_data.copy()
-    data["model_name"] = "ModelA" # Match the registration key
+    data["model_name"] = "ModelA"  # Match the registration key
     # Need the actual TestCase class from src/test_case.py
     from test_case import TestCase
+
     # Pass _duration_input explicitly if TestCase requires it
-    duration_input = data.get('duration_secs')
+    duration_input = data.get("duration_secs")
     return TestCase(**data, _duration_input=duration_input)
 
 
@@ -323,10 +356,12 @@ def test_case_a(valid_test_case_data) -> TestCase:
 def test_case_b(valid_test_case_data_minimal) -> TestCase:
     """Fixture for a TestCase configured for MockAdapterB."""
     data = valid_test_case_data_minimal.copy()
-    data["model_name"] = "ModelB" # Match the registration key
+    data["model_name"] = "ModelB"  # Match the registration key
     from test_case import TestCase
-    duration_input = data.get('duration_secs')
+
+    duration_input = data.get("duration_secs")
     return TestCase(**data, _duration_input=duration_input)
+
 
 @pytest.fixture
 def mock_test_cases() -> List[TestCase]:
@@ -335,15 +370,37 @@ def mock_test_cases() -> List[TestCase]:
     try:
         # Use data from conftest if TestCase is real
         from test_case import TestCase as RealTestCase
+
         # Need valid_test_case_data fixtures accessible here
         # Simplification: create basic valid instances directly
         return [
-            RealTestCase(id="t1", model_name="Mochi1", prompt="p1", resolution=(1,1), duration_secs=1.0, fps=1),
-            RealTestCase(id="t2", model_name="Hunyuan", prompt="p2", resolution=(2,2), duration_secs=2.0, fps=2),
-            RealTestCase(id="t3", model_name="Mochi1", prompt="p3", resolution=(3,3), duration_secs=3.0, fps=3),
+            RealTestCase(
+                id="t1",
+                model_name="Mochi1",
+                prompt="p1",
+                resolution=(1, 1),
+                duration_secs=1.0,
+                fps=1,
+            ),
+            RealTestCase(
+                id="t2",
+                model_name="Hunyuan",
+                prompt="p2",
+                resolution=(2, 2),
+                duration_secs=2.0,
+                fps=2,
+            ),
+            RealTestCase(
+                id="t3",
+                model_name="Mochi1",
+                prompt="p3",
+                resolution=(3, 3),
+                duration_secs=3.0,
+                fps=3,
+            ),
         ]
-    except NameError: # If RealTestCase wasn't imported
-         return [
+    except NameError:  # If RealTestCase wasn't imported
+        return [
             TestCase(id="t1", model_name="Mochi1"),
             TestCase(id="t2", model_name="Hunyuan"),
             TestCase(id="t3", model_name="Mochi1"),
@@ -355,13 +412,16 @@ def mock_paths(tmp_path: Path) -> Dict[str, Path]:
     """Provides mock paths for config and results."""
     return {
         "config": tmp_path / "test_cases.yaml",
-        "results": tmp_path / "results"
+        "results": tmp_path / "results",
     }
 
+
 @pytest.fixture
-def orchestrator_instance(mock_paths: Dict[str, Path]) -> BenchmarkOrchestrator:
+def orchestrator_instance(
+    mock_paths: Dict[str, Path],
+) -> BenchmarkOrchestrator:
     """Provides a basic BenchmarkOrchestrator instance."""
     return BenchmarkOrchestrator(
         test_cases_yaml_path=mock_paths["config"],
-        base_results_dir=mock_paths["results"]
+        base_results_dir=mock_paths["results"],
     )

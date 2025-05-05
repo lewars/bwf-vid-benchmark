@@ -13,10 +13,11 @@ from typing import Optional
 # in the test file to work correctly without patching the import itself.
 try:
     import pynvml
+
     PYNXML_AVAILABLE = True
 except ImportError:
     PYNXML_AVAILABLE = False
-    pynvml = None # Assign None if import fails
+    pynvml = None  # Assign None if import fails
 
 # Import PeakResourceUsage (ensure src/metrics.py exists with the definition)
 try:
@@ -24,13 +25,19 @@ try:
 except ImportError:
     # Define a placeholder if metrics module/class isn't available yet
     from dataclasses import dataclass
-    print("Warning: src.metrics.PeakResourceUsage not found. Using placeholder.")
+
+    print(
+        "Warning: src.metrics.PeakResourceUsage not found. Using placeholder."
+    )
+
     @dataclass(frozen=True)
     class PeakResourceUsage:
         peak_vram_mb: float = 0.0
         peak_ram_mb: float = 0.0
 
+
 log = logging.getLogger(__name__)
+
 
 class ResourceMonitor:
     """
@@ -51,7 +58,7 @@ class ResourceMonitor:
         self._gpu_monitoring_enabled = False
         self._nvml_handle = None
         log.info("Placeholder: Initialized ResourceMonitor.")
-        pass # Placeholder for _initialize_pynvml call
+        pass  # Placeholder for _initialize_pynvml call
 
     def _initialize_pynvml(self, gpu_index: int):
         """Placeholder for pynvml initialization."""

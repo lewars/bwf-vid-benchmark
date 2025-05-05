@@ -26,22 +26,23 @@ dependencies = [
     "PyYAML>=6.0",
     "psutil>=7.0",
     "pandas>=2.0",
-    "matplotlib>=3.8", # Adjusted based on typical compatibility
+    "matplotlib>=3.8",
     "seaborn>=0.13",
-    "numpy>=1.26", # Adjusted based on typical compatibility
-    "torch>=2.3", # Adjusted based on typical compatibility
-    "diffusers>=0.27", # Adjusted based on typical compatibility
-    "transformers>=4.38", # Adjusted based on typical compatibility
-    "accelerate>=0.27", # Adjusted based on typical compatibility
-    "opencv-python>=4.8", # Adjusted based on typical compatibility
-    "nvidia-ml-py>=12.0", # Or pynvml if preferred
+    "numpy>=1.26",
+    "torch>=2.3",
+    "diffusers>=0.27",
+    "transformers>=4.38",
+    "accelerate>=0.27",
+    "opencv-python>=4.8",
+    "nvidia-ml-py>=12.0",
     "Pillow>=10.0",
     "tqdm>=4.66",
-    "scikit-image>=0.22", # For potential SSIM calculation
-    "scipy>=1.11", # Dependency for scikit-image
-    "huggingface-hub>=0.20", # Dependency for diffusers/transformers
-    "safetensors>=0.4", # Dependency for diffusers/transformers
-    "filelock>=3.12", # Dependency for diffusers/transformers
+    "scikit-image>=0.22",
+    "scipy>=1.11",
+    "huggingface-hub>=0.20",
+    "safetensors>=0.4",
+    "filelock>=3.12",
+    "flake8-pyproject>=1.0",
 ]
 
 [project.optional-dependencies]
@@ -50,12 +51,12 @@ test = [
     "pytest-cov>=5.0",
 ]
 lint = [
-    "flake8>=7.0",
+    "flake8>=7.2.0",
     "yamllint>=1.35",
 ]
 dev = [
-    "bwf-vid-bench[test,lint]", # Installs dependencies from 'test' and 'lint' sections
-    "task>=0.2.0", # Include the task runner for convenience
+    "bwf-vid-bench[test,lint]",
+    "go-task-bin>=3.0.0",
     "black",
     "isort",
     "mypy",
@@ -79,17 +80,6 @@ filterwarnings = [
     "ignore:cannot collect test class 'TestMetrics'.*__init__ constructor:pytest.PytestCollectionWarning",
 ]
 
-[tool.flake8]
-max-line-length = 88
-exclude = [
-    ".venv",
-    ".git",
-    "__pycache__",
-    "build",
-    "dist",
-    "*.egg-info",
-]
-
 [tool.coverage.run]
 source = ["src"]
 branch = true
@@ -100,8 +90,22 @@ show_missing = true
 skip_covered = true
 
 [tool.black]
-line-length = 88
+line-length = 80
+target-version = ["py312"]
 
 [tool.isort]
 profile = "black"
-line_length = 88
+line_length = 80
+
+[tool.flake8]
+exclude = [
+    ".venv",
+    ".git",
+    "__pycache__",
+    "build",
+    "dist",
+    "*.egg-info",
+]
+count = true
+ignore = ["E501"]
+

@@ -3,14 +3,17 @@ import pandas as pd
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 from dataclasses import dataclass
-import logging # Added for logging potential issues
+import logging  # Added for logging potential issues
 
 # Configure basic logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 log = logging.getLogger(__name__)
 
 
 # --- Helper for JSON Serialization ---
+
 
 def _to_dict_for_json(obj: Any) -> Any:
     """
@@ -32,15 +35,20 @@ def _to_dict_for_json(obj: Any) -> Any:
 @dataclass(frozen=True)
 class PeakResourceUsage:
     """Immutable dataclass holding peak resource usage."""
+
     pass
+
 
 @dataclass
 class TestMetrics:
     """Mutable dataclass holding results for a single test case run."""
+
     pass
+
 
 class MetricsRecorder:
     """
     Handles saving benchmark metrics to disk (JSON details, CSV summary).
     """
+
     pass

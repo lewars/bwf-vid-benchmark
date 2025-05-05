@@ -115,7 +115,9 @@ def test_analyze_script_csv_not_found(
     analyze_results.main()
 
     mock_is_file.assert_called_once()
-    mock_log.error.assert_called_with(f"Input CSV file not found: {mock_args.csv_file}")
+    mock_log.error.assert_called_with(
+        f"Input CSV file not found: {mock_args.csv_file}"
+    )
     mock_sys_exit.assert_called_once_with(1)
 
 
@@ -184,7 +186,9 @@ def test_analyze_script_analyzer_init_error(
     mock_is_file.assert_called_once()
     mock_mkdir.assert_called_once()
     mock_ResultsAnalyzer.assert_called_once_with(csv_path=mock_args.csv_file)
-    mock_log.error.assert_called_with("Analysis failed: Missing required columns")
+    mock_log.error.assert_called_with(
+        "Analysis failed: Missing required columns"
+    )
     mock_sys_exit.assert_called_once_with(1)
 
 

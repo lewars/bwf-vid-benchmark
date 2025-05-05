@@ -5,18 +5,30 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Dict, Type, Optional, Sequence
 
-from test_case import load_test_cases_from_yaml, TestCase, TestCaseLoadError
-from video_generator import VideoGenerator, GeneratedVideo, ModelAdapter, Mochi1Adapter, HunyuanAdapter
+from test_case import (
+    load_test_cases_from_yaml,
+    TestCase,
+    TestCaseLoadError,
+)
+from video_generator import (
+    VideoGenerator,
+    GeneratedVideo,
+    ModelAdapter,
+    Mochi1Adapter,
+    HunyuanAdapter,
+)
 from metrics import MetricsRecorder, TestMetrics, PeakResourceUsage
 from monitor import ResourceMonitor
 
 log = logging.getLogger(__name__)
+
 
 class BenchmarkOrchestrator:
     """
     Orchestrates the execution of the video generation benchmark.
     (Placeholder implementation)
     """
+
     REGISTERED_ADAPTERS: Dict[str, Type[ModelAdapter]] = {
         "mochi1": Mochi1Adapter,
         "hunyuan": HunyuanAdapter,
@@ -39,11 +51,15 @@ class BenchmarkOrchestrator:
         """Placeholder setup."""
         log.info("Placeholder: Running setup.")
         pass
-        self._is_setup = True # Simulate setup completion
+        self._is_setup = True  # Simulate setup completion
 
-    def execute_test_cases(self, test_ids_to_run: Optional[Sequence[str]] = None):
+    def execute_test_cases(
+        self, test_ids_to_run: Optional[Sequence[str]] = None
+    ):
         """Placeholder execute."""
-        log.info(f"Placeholder: Executing test cases (specific IDs: {test_ids_to_run}).")
+        log.info(
+            f"Placeholder: Executing test cases (specific IDs: {test_ids_to_run})."
+        )
         pass
 
     def compile_summary(self):
@@ -82,9 +98,9 @@ class BenchmarkOrchestrator:
         return TestMetrics(test_case_id=test_case.id, status="completed")
 
     def get_loaded_test_cases(self) -> List[TestCase]:
-         """Placeholder getter."""
-         return []
+        """Placeholder getter."""
+        return []
 
     def get_collected_metrics(self) -> List[TestMetrics]:
-         """Placeholder getter."""
-         return []
+        """Placeholder getter."""
+        return []
