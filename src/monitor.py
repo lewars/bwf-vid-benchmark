@@ -1,7 +1,7 @@
-# src/monitor.py
 """
 Placeholder for the ResourceMonitor class.
 """
+
 import os
 import time
 import threading

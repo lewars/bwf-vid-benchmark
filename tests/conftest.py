@@ -285,8 +285,7 @@ def mock_psutil():
 # --- Mock Adapter Classes ---
 # Create mock classes that conform to the ModelAdapter protocol for testing
 
-
-class MockAdapterA:
+class _MockAdapterAImpl:
     """Mock adapter class A conforming to ModelAdapter protocol."""
 
     def __init__(self):
@@ -309,7 +308,7 @@ class MockAdapterA:
         pass
 
 
-class MockAdapterB:
+class _MockAdapterBImpl:
     """Mock adapter class B conforming to ModelAdapter protocol."""
 
     def __init__(self):
@@ -345,11 +344,8 @@ def test_case_a(valid_test_case_data) -> TestCase:
     data = valid_test_case_data.copy()
     data["model_name"] = "ModelA"  # Match the registration key
     # Need the actual TestCase class from src/test_case.py
-    from test_case import TestCase
 
-    # Pass _duration_input explicitly if TestCase requires it
-    duration_input = data.get("duration_secs")
-    return TestCase(**data, _duration_input=duration_input)
+    return TestCase(**data)
 
 
 @pytest.fixture
@@ -357,10 +353,8 @@ def test_case_b(valid_test_case_data_minimal) -> TestCase:
     """Fixture for a TestCase configured for MockAdapterB."""
     data = valid_test_case_data_minimal.copy()
     data["model_name"] = "ModelB"  # Match the registration key
-    from test_case import TestCase
 
-    duration_input = data.get("duration_secs")
-    return TestCase(**data, _duration_input=duration_input)
+    return TestCase(**data)
 
 
 @pytest.fixture
@@ -425,3 +419,13 @@ def orchestrator_instance(
         test_cases_yaml_path=mock_paths["config"],
         base_results_dir=mock_paths["results"],
     )
+
+@pytest.fixture
+def MockAdapterA() -> type: # Fixture named MockAdapterA, returns a type
+    """Pytest fixture that returns the MockAdapterA class."""
+    return _MockAdapterAImpl # Return the actual class object
+
+@pytest.fixture
+def MockAdapterB() -> type: # Fixture named MockAdapterB, returns a type
+    """Pytest fixture that returns the MockAdapterB class."""
+    return _MockAdapterBImpl # Return the actual class object

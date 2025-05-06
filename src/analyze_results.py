@@ -1,4 +1,3 @@
-# src/analyze_results.py
 import argparse
 from pathlib import Path
 import logging
