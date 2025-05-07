@@ -4,6 +4,7 @@ Unit tests for the PeakResourceUsage and TestMetrics data classes.
 """
 
 import pytest
+from pathlib import Path
 from dataclasses import dataclass, field, FrozenInstanceError, is_dataclass
 from typing import Any
 
@@ -73,14 +74,16 @@ def test_testmetrics_successful_initialization_completed(
             status="completed",
             generation_time_secs=123.45,
             peak_resources=valid_peak_resources,
-            output_video_path="/results/run1/test001/video.mp4",
+            output_video_path=Path("/results/run1/test001/video.mp4"),
             error_message=None,
         )
         assert metrics.test_case_id == "test001"
         assert metrics.status == "completed"
         assert metrics.generation_time_secs == 123.45
         assert metrics.peak_resources == valid_peak_resources
-        assert metrics.output_video_path == "/results/run1/test001/video.mp4"
+        assert metrics.output_video_path == Path(
+            "/results/run1/test001/video.mp4"
+        )
         assert metrics.error_message is None
     except (ValueError, TypeError) as e:
         pytest.fail(f"Valid 'completed' TestMetrics initialization failed: {e}")
@@ -183,7 +186,10 @@ def test_testmetrics_validation_invalid_peak_resources():
 
 def test_testmetrics_validation_invalid_output_path(valid_peak_resources):
     """Test validation failure for invalid output_video_path type."""
-    with pytest.raises(TypeError, match="output_video_path.*string or None"):
+    with pytest.raises(
+        TypeError,
+        match="TestMetrics output_video_path must be a Path instance or None, got .*",
+    ):
         TestMetrics(
             test_case_id="test006",
             status="completed",
@@ -197,7 +203,10 @@ def test_testmetrics_validation_invalid_output_path(valid_peak_resources):
 def test_testmetrics_validation_error_message_mismatch():
     """Test validation failure when error_message doesn't match status."""
     # Error message provided but status is 'completed'
-    with pytest.raises(ValueError, match="error_message should be None"):
+    with pytest.raises(
+        ValueError,
+        match="TestMetrics for .* is 'completed' but has an error_message: .*",
+    ):
         TestMetrics(
             test_case_id="test007",
             status="completed",
@@ -208,7 +217,8 @@ def test_testmetrics_validation_error_message_mismatch():
         )
     # Status is 'failed' but error_message is None
     with pytest.raises(
-        ValueError, match="error_message.*non-empty string.*failed"
+        ValueError,
+        match="TestMetrics for .* is 'failed' but has no error_message.",
     ):
         TestMetrics(
             test_case_id="test008",
@@ -220,7 +230,8 @@ def test_testmetrics_validation_error_message_mismatch():
         )
     # Status is 'failed' but error_message is empty
     with pytest.raises(
-        ValueError, match="error_message.*non-empty string.*failed"
+        ValueError,
+        match="TestMetrics for .* is 'failed' but has no error_message.",
     ):
         TestMetrics(
             test_case_id="test009",
