@@ -14,7 +14,7 @@ from typing import Any, Dict, Callable, List, Union
 
 from test_case import TestCase
 from video_generator import VideoGenerator, GeneratedVideo, ModelAdapter
-from metrics import PeakResourceUsage, TestMetrics
+from metrics import PeakResourceUsage, TestMetrics, MetricsRecorder
 from monitor import ResourceMonitor
 from orchestrator import BenchmarkOrchestrator
 
@@ -88,8 +88,20 @@ def minimal_completed_test_metrics() -> TestMetrics:
     return TestMetrics(
         test_case_id="test_minimal_03",
         status="completed",
-        # All optional fields are None by default
     )
+
+
+@pytest.fixture
+def minimal_completed_test_metricsrecoder() -> MetricsRecorder:
+    """Returns a minimal valid MetricsRecorder instance."""
+    mr = MetricsRecorder(
+        run_id="test_mrec_01",
+        base_output_dir=Path("."),
+    )
+
+    yield mr
+
+    mr.cleanup()
 
 
 @pytest.fixture
@@ -126,17 +138,11 @@ def yaml_file_creator(
 
     yield _creator  # Yield the creator function to the test
 
-    # --- Cleanup Phase ---
-    # This code runs after the test function finishes
     for file_path in created_files:
         try:
-            if (
-                file_path.exists()
-            ):  # Check if file still exists before trying to delete
+            if file_path.exists() and file_path.is_file():
                 os.remove(file_path)
-                # print(f"Cleaned up: {file_path}") # Optional: for debugging
         except OSError as e:
-            # Log error if cleanup fails, but don't fail the test itself
             print(
                 f"Warning: Failed to clean up temporary file {file_path}: {e}"
             )
@@ -285,6 +291,7 @@ def mock_psutil():
 # --- Mock Adapter Classes ---
 # Create mock classes that conform to the ModelAdapter protocol for testing
 
+
 class _MockAdapterAImpl:
     """Mock adapter class A conforming to ModelAdapter protocol."""
 
@@ -420,12 +427,14 @@ def orchestrator_instance(
         base_results_dir=mock_paths["results"],
     )
 
-@pytest.fixture
-def MockAdapterA() -> type: # Fixture named MockAdapterA, returns a type
-    """Pytest fixture that returns the MockAdapterA class."""
-    return _MockAdapterAImpl # Return the actual class object
 
 @pytest.fixture
-def MockAdapterB() -> type: # Fixture named MockAdapterB, returns a type
+def MockAdapterA() -> type:  # Fixture named MockAdapterA, returns a type
+    """Pytest fixture that returns the MockAdapterA class."""
+    return _MockAdapterAImpl  # Return the actual class object
+
+
+@pytest.fixture
+def MockAdapterB() -> type:  # Fixture named MockAdapterB, returns a type
     """Pytest fixture that returns the MockAdapterB class."""
-    return _MockAdapterBImpl # Return the actual class object
+    return _MockAdapterBImpl  # Return the actual class object

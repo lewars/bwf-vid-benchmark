@@ -2,6 +2,7 @@
 Defines data structures for holding benchmark metrics, including resource usage.
 """
 
+import shutil
 import json
 import pandas as pd
 from pathlib import Path
@@ -183,14 +184,14 @@ class MetricsRecorder:
         try:
             self.run_dir_path.mkdir(parents=True, exist_ok=True)
             log.info(
-                f"MetricsRecorder: Results will be saved in {self.run_dir_path}"
+                f"MetricsRecorder: Results will be saved in {self.run_dir_path.resolve()}"
             )
         except OSError as e:
             log.error(
-                f"MetricsRecorder: Failed to create run directory {self.run_dir_path}: {e}"
+                f"MetricsRecorder: Failed to create run directory {self.run_dir_path.resolve()}: {e}"
             )
             raise IOError(
-                f"Failed to create run directory {self.run_dir_path}"
+                f"Failed to create run directory {self.run_dir_path.resolve()}"
             ) from e
         log.debug(f"MetricsRecorder initialized for run: {self.run_id}")
 
@@ -208,15 +209,15 @@ class MetricsRecorder:
             test_case_output_dir.mkdir(parents=True, exist_ok=True)
         except OSError as e:
             log.error(
-                f"Failed to create test case directory {test_case_output_dir}: {e}"
+                f"Failed to create test case directory {test_case_output_dir.resolve()}: {e}"
             )
             raise IOError(
-                f"Failed to create test case directory {test_case_output_dir}"
+                f"Failed to create test case directory {test_case_output_dir.resolve()}"
             ) from e
 
         json_file_path = test_case_output_dir / "metrics.json"
         log.debug(
-            f"Recording detailed metrics for {metrics.test_case_id} to {json_file_path}"
+            f"Recording detailed metrics for {metrics.test_case_id} to {json_file_path.resolve()}"
         )
 
         try:
@@ -225,7 +226,7 @@ class MetricsRecorder:
             with open(json_file_path, "w", encoding="utf-8") as f:
                 json.dump(metrics_dict, f, indent=4)
             log.info(
-                f"Detailed metrics for {metrics.test_case_id} saved to {json_file_path}"
+                f"Detailed metrics for {metrics.test_case_id} saved to {json_file_path.resolve()}"
             )
             return json_file_path
         except TypeError as e:
@@ -238,11 +239,11 @@ class MetricsRecorder:
             ) from e
         except IOError as e:
             log.error(
-                f"IOError saving detailed metrics for {metrics.test_case_id} to {json_file_path}: {e}",
+                f"IOError saving detailed metrics for {metrics.test_case_id} to {json_file_path.resolve()}: {e}",
                 exc_info=True,
             )
             raise IOError(
-                f"Could not write metrics JSON to {json_file_path}"
+                f"Could not write metrics JSON to {json_file_path.resolve()}"
             ) from e
 
     def compile_summary_csv(self, all_metrics: List[TestMetrics]) -> Path:
@@ -260,7 +261,7 @@ class MetricsRecorder:
 
         summary_csv_path = self.run_dir_path / "summary.csv"
         log.debug(
-            f"Compiling summary CSV for {len(all_metrics)} test cases to {summary_csv_path}"
+            f"Compiling summary CSV for {len(all_metrics)} test cases to {summary_csv_path.resolve()}"
         )
 
         records_for_df = []
@@ -297,16 +298,37 @@ class MetricsRecorder:
             ]  # Reorder/select columns
 
             summary_df.to_csv(summary_csv_path, index=False, encoding="utf-8")
-            log.info(f"Benchmark summary CSV saved to: {summary_csv_path}")
+            log.info(
+                f"Benchmark summary CSV saved to: {summary_csv_path.resolve()}"
+            )
             return summary_csv_path
         except Exception as e:  # Catch pandas errors or IOErrors
             log.error(
-                f"Failed to compile or save summary CSV to {summary_csv_path}: {e}",
+                f"Failed to compile or save summary CSV to {summary_csv_path.resolve()}: {e}",
                 exc_info=True,
             )
             raise IOError(
-                f"Could not write summary CSV to {summary_csv_path}"
+                f"Could not write summary CSV to {summary_csv_path.resolve()}"
             ) from e
+
+    def cleanup(self):
+        """
+        Cleans up the run directory and all its contents.
+        """
+        if self.run_dir_path.exists() and self.run_dir_path.is_dir():
+            try:
+                shutil.rmtree(self.run_dir_path)
+                log.info(
+                    f"Run directory {self.run_dir_path.resolve()} cleaned up."
+                )
+            except OSError as e:
+                log.error(
+                    f"Failed to clean up run directory {self.run_dir_path.resolve()}: {e}",
+                    exc_info=True,
+                )
+                raise IOError(
+                    f"Failed to clean up run directory {self.run_dir_path.resolve()}"
+                ) from e
 
 
 def _to_dict_for_json(obj: Any) -> Any:

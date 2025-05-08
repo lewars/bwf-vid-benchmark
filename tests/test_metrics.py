@@ -1,14 +1,19 @@
-# tests/test_metrics.py
 """
 Unit tests for the PeakResourceUsage and TestMetrics data classes.
 """
 
+from os.path import exists
 import pytest
 from pathlib import Path
 from dataclasses import dataclass, field, FrozenInstanceError, is_dataclass
 from typing import Any
 
-from metrics import PeakResourceUsage, TestMetrics
+from metrics import (
+    PeakResourceUsage,
+    TestMetrics,
+    MetricsRecorder,
+    _to_dict_for_json,
+)
 
 # --- Tests for PeakResourceUsage ---
 
@@ -21,13 +26,9 @@ def test_peakresourceusage_is_dataclass():
 def test_peakresourceusage_successful_initialization():
     """Test successful creation with valid data."""
     try:
-        res = PeakResourceUsage(
-            peak_vram_mb=4096.0, peak_ram_mb=8192
-        )  # Test int RAM
+        res = PeakResourceUsage(peak_vram_mb=4096.0, peak_ram_mb=8192)
         assert res.peak_vram_mb == 4096.0
-        assert (
-            res.peak_ram_mb == 8192.0
-        )  # Assuming conversion or flexible typing
+        assert res.peak_ram_mb == 8192.0
     except ValueError as e:
         pytest.fail(f"Valid PeakResourceUsage initialization failed: {e}")
 
@@ -42,9 +43,9 @@ def test_peakresourceusage_immutability(valid_peak_resources):
 
 def test_peakresourceusage_validation_negative_values():
     """Test validation failure for negative resource values."""
-    with pytest.raises(ValueError, match="peak_vram_mb.*non-negative"):
+    with pytest.raises(ValueError, match="peak_vram_mb.*non-negative.*"):
         PeakResourceUsage(peak_vram_mb=-100.0, peak_ram_mb=1024.0)
-    with pytest.raises(ValueError, match="peak_ram_mb.*non-negative"):
+    with pytest.raises(ValueError, match="peak_ram_mb.*non-negative.*"):
         PeakResourceUsage(peak_vram_mb=1024.0, peak_ram_mb=-50.5)
 
 
@@ -200,6 +201,55 @@ def test_testmetrics_validation_invalid_output_path(valid_peak_resources):
         )  # type: ignore
 
 
+def test_testmetrics_validation_invalid_video_file_size_byptes():
+    """Test validation failure for invalid output_video_path file size."""
+    # Assuming the video file size is less than 1 MB
+    with pytest.raises(
+        ValueError,
+        match="TestMetrics video_file_size_bytes must be a non-negative integer or None, got .*",
+    ):
+        TestMetrics(
+            test_case_id="test006",
+            status="completed",
+            generation_time_secs=10.0,
+            peak_resources=None,
+            output_video_path=Path("small_video.mp4"),
+            video_file_size_bytes=-1,
+            error_message=None,
+        )
+
+
+def test_testmetrics_validation_invalid_avg_frame_ssim():
+    """Test validation failure for invalid avg_frame_ssim."""
+    with pytest.raises(
+        ValueError,
+        match="TestMetrics avg_frame_ssim must be a float or None, got .*",
+    ):
+        TestMetrics(
+            test_case_id="test007",
+            status="completed",
+            generation_time_secs=10.0,
+            peak_resources=None,
+            output_video_path=Path("video.mp4"),
+            avg_frame_ssim=int(1),
+            error_message=None,
+        )
+
+    with pytest.raises(
+        ValueError,
+        match="TestMetrics avg_frame_ssim must be a float or None, got .*",
+    ):
+        TestMetrics(
+            test_case_id="test007",
+            status="completed",
+            generation_time_secs=10.0,
+            peak_resources=None,
+            output_video_path=Path("video.mp4"),
+            avg_frame_ssim=int(1),
+            error_message=None,
+        )
+
+
 def test_testmetrics_validation_error_message_mismatch():
     """Test validation failure when error_message doesn't match status."""
     # Error message provided but status is 'completed'
@@ -241,3 +291,47 @@ def test_testmetrics_validation_error_message_mismatch():
             output_video_path=None,
             error_message="",
         )
+
+
+def test_metricrecorder_create_run_directory(
+    minimal_completed_test_metricsrecoder,
+):
+    """Test if run directory exists"""
+    assert minimal_completed_test_metricsrecoder.run_dir_path.exists()
+    assert minimal_completed_test_metricsrecoder.run_dir_path.is_dir()
+
+
+def test_metricsrecorder_run_dir_path(minimal_completed_test_metricsrecoder):
+    """Test if run directory path is set correctly"""
+    assert minimal_completed_test_metricsrecoder.run_dir_path == Path(
+        "test_mrec_01_run"
+    )
+    assert minimal_completed_test_metricsrecoder.run_dir_path.exists()
+    assert minimal_completed_test_metricsrecoder.run_dir_path.is_dir()
+
+
+def test_metricsrecorder_cleanup():
+    """Test if cleanup method removes the run directory"""
+    mr = MetricsRecorder(
+        base_output_dir=Path("."),
+        run_id="test_mrec_01",
+    )
+
+    mr.cleanup()
+    assert not mr.run_dir_path.exists()
+
+
+def test_to_dict_for_json(minimal_completed_test_metrics):
+    """Test if _to_dict_for_json returns a dictionary with the correct keys"""
+
+    # Convert the TestMetrics instance to a dictionary
+    test_dict = _to_dict_for_json(minimal_completed_test_metrics)
+    assert isinstance(test_dict, dict)
+    assert "test_case_id" in test_dict
+    assert "status" in test_dict
+    assert "generation_time_secs" in test_dict
+    assert "peak_resources" in test_dict
+    assert "output_video_path" in test_dict
+    assert "error_message" in test_dict
+    assert "video_file_size_bytes" in test_dict
+    assert "avg_frame_ssim" in test_dict
