@@ -25,7 +25,7 @@ except ImportError as e:
     sys.exit(1)
 
 
-def _parse_arguments() -> argparse.Namespace:
+def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Analyze benchmark summary CSV and generate plots.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
@@ -49,7 +49,7 @@ def _parse_arguments() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def _validate_and_prepare_paths(csv_path: Path, output_dir: Path):
+def validate_and_prepare_paths(csv_path: Path, output_dir: Path):
     """
     Validates the input CSV path and creates the output directory if needed.
 
@@ -79,7 +79,7 @@ def _validate_and_prepare_paths(csv_path: Path, output_dir: Path):
         sys.exit(1)
 
 
-def _perform_analysis_and_plotting(analyzer: ResultsAnalyzer, output_dir: Path):
+def perform_analysis_and_plotting(analyzer: ResultsAnalyzer, output_dir: Path):
     """
     Uses the ResultsAnalyzer instance to generate plots and statistics.
 
@@ -114,19 +114,19 @@ def _perform_analysis_and_plotting(analyzer: ResultsAnalyzer, output_dir: Path):
 
 
 def main():
-    args = _parse_arguments()
+    args = parse_arguments()
 
     try:
-        _validate_and_prepare_paths(args.csv_file, args.output_dir)
+        validate_and_prepare_paths(args.csv_file, args.output_dir)
         analyzer = ResultsAnalyzer(csv_path=args.csv_file)
-        _perform_analysis_and_plotting(analyzer, args.output_dir)
+        perform_analysis_and_plotting(analyzer, args.output_dir)
         log.info(
             f"Analysis complete. Plots saved in {args.output_dir.resolve()}"
         )
         sys.exit(0)  # Success
 
     except FileNotFoundError as e:
-        # Should be caught by _validate_and_prepare_paths or ResultsAnalyzer init
+        # Should be caught by validate_and_prepare_paths or ResultsAnalyzer init
         log.error(f"File not found error during analysis: {e}")
         sys.exit(1)
     except (pd.errors.EmptyDataError, pd.errors.ParserError) as e:
@@ -136,7 +136,7 @@ def main():
         sys.exit(1)
     except ValueError as e:
         # Catches ValueErrors from ResultsAnalyzer (e.g., missing columns, no data)
-        # or from _perform_analysis_and_plotting if stats calculation fails in a way not caught internally.
+        # or from perform_analysis_and_plotting if stats calculation fails in a way not caught internally.
         log.error(f"Data validation or processing error: {e}")
         sys.exit(1)
     except IOError as e:
