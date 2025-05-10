@@ -19,7 +19,7 @@ The framework prioritizes reproducibility, automation via Taskfile, and resource
 **Clone the repository and Setup Environment:**
    ```bash
    git clone https://github.com/lewars/bwf-vid-benchmark.git
-   cd bwf-vid-bench
+   cd bwf-vid-benchmark
    pip install task
    task setup
    ```
