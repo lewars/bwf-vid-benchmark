@@ -31,7 +31,7 @@ flake8==7.2.0
     #   flake8-pyproject
 flake8-pyproject==1.2.3
     # via bwf-vid-bench (pyproject.toml)
-fonttools==4.57.0
+fonttools==4.58.0
     # via matplotlib
 fsspec==2025.3.2
     # via
@@ -39,7 +39,9 @@ fsspec==2025.3.2
     #   torch
 go-task-bin==3.43.3
     # via bwf-vid-bench (pyproject.toml)
-huggingface-hub==0.30.2
+hf-xet==1.1.0
+    # via huggingface-hub
+huggingface-hub==0.31.1
     # via
     #   bwf-vid-bench (pyproject.toml)
     #   accelerate
@@ -64,7 +66,7 @@ lazy-loader==0.4
     # via scikit-image
 markupsafe==3.0.2
     # via jinja2
-matplotlib==3.10.1
+matplotlib==3.10.3
     # via
     #   bwf-vid-bench (pyproject.toml)
     #   seaborn
@@ -124,8 +126,10 @@ nvidia-cusparse-cu12==12.5.4.2
     #   torch
 nvidia-cusparselt-cu12==0.6.3
     # via torch
-nvidia-ml-py==12.570.86
-    # via bwf-vid-bench (pyproject.toml)
+nvidia-ml-py==12.575.51
+    # via
+    #   bwf-vid-bench (pyproject.toml)
+    #   pynvml
 nvidia-nccl-cu12==2.26.2
     # via torch
 nvidia-nvjitlink-cu12==12.6.85
@@ -163,7 +167,7 @@ pillow==11.2.1
     #   imageio
     #   matplotlib
     #   scikit-image
-platformdirs==4.3.7
+platformdirs==4.3.8
     # via black
 pluggy==1.5.0
     # via pytest
@@ -175,6 +179,8 @@ pycodestyle==2.13.0
     # via flake8
 pyflakes==3.3.2
     # via flake8
+pynvml==12.0.0
+    # via bwf-vid-bench (pyproject.toml)
 pyparsing==3.2.3
     # via matplotlib
 pytest==8.3.5
@@ -213,13 +219,13 @@ safetensors==0.5.3
     #   transformers
 scikit-image==0.25.2
     # via bwf-vid-bench (pyproject.toml)
-scipy==1.15.2
+scipy==1.15.3
     # via
     #   bwf-vid-bench (pyproject.toml)
     #   scikit-image
 seaborn==0.13.2
     # via bwf-vid-bench (pyproject.toml)
-setuptools==80.3.1
+setuptools==80.4.0
     # via
     #   torch
     #   triton
@@ -227,7 +233,7 @@ six==1.17.0
     # via python-dateutil
 sympy==1.14.0
     # via torch
-tifffile==2025.3.30
+tifffile==2025.5.10
     # via scikit-image
 tokenizers==0.21.1
     # via transformers
