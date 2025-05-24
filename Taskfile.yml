@@ -28,7 +28,7 @@ tasks:
     desc: Generate requirements.txt lock file from pyproject.toml using uv
     deps: [venv]
     cmds:
-      - 'uv pip compile --extra dev --resolver=backtracking pyproject.toml -o {{.REQ_FILE}}'
+      - 'uv pip compile --extra dev pyproject.toml -o {{.REQ_FILE}}'
     status:
       - test -f {{.REQ_FILE}}
 
@@ -67,10 +67,12 @@ tasks:
       - echo "All linters passed."
 
   black:
+    aliases: [black]
     desc: Format Python source code and tests using black
     deps: [setup]
     cmds:
       - '{{.PYTHON_EXEC}} -m black {{.SRC_DIR}} {{.UNIT_TEST_DIR}}'
+      - '{{.PYTHON_EXEC}} -m isort {{.SRC_DIR}} {{.UNIT_TEST_DIR}}'
 
   test:
     desc: Run unit tests using pytest
