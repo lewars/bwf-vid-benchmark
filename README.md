@@ -1,4 +1,4 @@
-# **bwf-vid-bench: AI Video Generation Benchmark Framework**
+# **bwf-vid-bench: AI Video Generation Benchmark Framework - WIP**
 
 A minimal viable testing framework designed to benchmark AI video generation models, optimized for GPU acceleration on Linux systems.
 
