@@ -1,5 +1,7 @@
 # **bwf-vid-bench: AI Video Generation Benchmark Framework - WIP**
 
+⚠️ This project is a work in progress and isn't done.
+
 A minimal viable testing framework designed to benchmark AI video generation models, optimized for GPU acceleration on Linux systems.
 
 The framework prioritizes reproducibility, automation via Taskfile, and resource efficiency, tailored to the target hardware.
